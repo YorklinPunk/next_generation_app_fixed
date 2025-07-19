@@ -3,7 +3,6 @@ import 'package:next_generation_app_fixed/screens/principal_screen.dart';
 import 'package:next_generation_app_fixed/screens/register_screen.dart';
 import 'package:next_generation_app_fixed/services/auth_service.dart';
 import 'package:next_generation_app_fixed/utils/dialog_helper.dart';
-import 'package:next_generation_app_fixed/screens/principal_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);

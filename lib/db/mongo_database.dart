@@ -1,4 +1,5 @@
 import 'package:mongo_dart/mongo_dart.dart';
+import '../models/programming_model.dart';
 import '../models/user_model.dart';
 import '../models/ministry_model.dart';
 
@@ -12,6 +13,7 @@ class MongoDatabase {
   static var rolesCollection;
   static var checkinsCollection;
   static var ministriesCollection;
+  static var programmingCollection;
 
   static Future<void> connect() async {
     db = await Db.create(
@@ -26,6 +28,7 @@ class MongoDatabase {
     rolesCollection = db.collection("roles");
     checkinsCollection = db.collection("checkins");
     ministriesCollection = db.collection("ministries");
+    programmingCollection = db.collection("programming");
   }
 
   //Hash de contraseña
@@ -40,15 +43,15 @@ class MongoDatabase {
     return await userCollection.find().toList();
   }
 
-    // Método para insertar un usuario con modelo
-  static Future<void> insertUser(UserModel user) async {
-    try {
-      await userCollection.insertOne(user.toMap());
-      print("Usuario registrado con éxito ${user.username}");
-    } catch (e) {
-      print("Error al registrar: $e");
-    }
-  }
+  // Método para insertar un usuario con modelo
+  // static Future<void> insertUser(UserModel user) async {
+  //   try {
+  //     await userCollection.insertOne(user.toMap());
+  //     print("Usuario registrado con éxito ${user.username}");
+  //   } catch (e) {
+  //     print("Error al registrar: $e");
+  //   }
+  // }
 
   static Future<List<UserModel>> getUsers() async {
     final docs = await userCollection.find().toList();
@@ -91,4 +94,79 @@ class MongoDatabase {
       return [];
     }
   }
+
+
+  //CRU programming
+  static Future<bool> insertProgramming(ProgrammingModel programming) async {
+    try {
+      final result = await programmingCollection.insertOne(programming.toMap());
+      return result.isSuccess;
+    } catch (e) {
+      print("Error al insertar programación: $e");
+      return false;
+    }
+  }
+
+  static Future<bool> updateProgramming(ProgrammingModel programming) async {
+    try {
+      if (programming.id == null) {
+        print("No se puede actualizar: id nulo");
+        return false;
+      }
+
+      final result = await programmingCollection.updateOne(
+        where.id(programming.id!),
+        modify.set('nomUsuarioCreacion', programming.nomUsuarioCreacion)
+          ..set('fechaHoraCreacion', programming.fechaHoraCreacion.toIso8601String())
+          ..set('roles', programming.roles.map((e) => e.toMap()).toList())
+          ..set('fechaHoraPogramacion', programming.fechaHoraPogramacion.toIso8601String())
+          ..set('fechaHoraEdicion', programming.fechaHoraEdicion.toIso8601String())
+          ..set('nomUsuarioEdicion', programming.nomUsuarioEdicion),
+      );
+
+      return result.isSuccess;
+    } catch (e) {
+      print("Error al actualizar programación: $e");
+      return false;
+    }
+  }
+
+  static Future<List<ProgrammingModel>> getAllProgrammings() async {
+    final result = await MongoDatabase.programmingCollection.find().toList();
+    return result.map((e) => ProgrammingModel.fromMap(e)).toList();
+  }
+
+  static Future<ProgrammingModel> latestOfCurrentWeek() async {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+
+    try {
+      final result = await programmingCollection.find({
+        'fechaHoraPogramacion': {
+          '\$gte': startOfWeek.toIso8601String(),
+          '\$lte': endOfWeek.toIso8601String(),
+        }
+      }).sort({'fechaHoraPogramacion': -1}).toList();
+
+      if (result.isNotEmpty) {
+        return ProgrammingModel.fromMap(result.first);
+      }
+    } catch (e) {
+      print("Error al buscar programación de la semana actual: $e");
+    }
+
+    // Retornar modelo vacío si no se encontró nada o hubo error
+    return ProgrammingModel(
+      id: null,
+      nomUsuarioCreacion: '',
+      fechaHoraCreacion: DateTime.now(),
+      roles: [],
+      fechaHoraPogramacion: DateTime.now(),
+      fechaHoraEdicion: DateTime.now(),
+      nomUsuarioEdicion: '',
+    );
+  }
+
+
 }

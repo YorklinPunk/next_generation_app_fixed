@@ -83,7 +83,7 @@ String _getText(int code) {
     case 2:
       return 'Error';
     case 3:
-      return 'Canlelado';
+      return 'Cancelado';
     default:
       return 'Información';
   }

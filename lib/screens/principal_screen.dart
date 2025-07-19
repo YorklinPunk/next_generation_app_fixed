@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:next_generation_app_fixed/models/user_model.dart';
+import 'package:next_generation_app_fixed/screens/principal_menu/weare_screen.dart';
+import 'package:next_generation_app_fixed/screens/principal_menu/programming_screen.dart';
+
 
 class PrincipalScreen extends StatelessWidget {
   final UserModel user;
@@ -68,7 +71,10 @@ class PrincipalScreen extends StatelessWidget {
                       color: const Color(0xFFEBD8FD),
                       icon: Icons.present_to_all,
                       onTap: () {
-                        Navigator.pushNamed(context, "/smartTv");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const WeAreScreen()),
+                        );
                       },
                     ),
                     // _smartCard(
@@ -88,7 +94,10 @@ class PrincipalScreen extends StatelessWidget {
                       color: const Color(0xFFFFF2C7),
                       icon: Icons.event,
                       onTap: () {
-                        Navigator.pushNamed(context, "/audioSystem");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ProgrammingScreen()),
+                        );
                       },
                     ),
                     _smartCard(
@@ -127,6 +136,16 @@ class PrincipalScreen extends StatelessWidget {
                       subtitle: "Asignación de tareas a servidores",
                       color: const Color(0xFFFFF2C7),
                       icon: Icons.assignment_ind,
+                      onTap: () {
+                        Navigator.pushNamed(context, "/heatingSystem");
+                      },
+                    ),
+                    _smartCard(
+                      context,
+                      title: "Anuncios",
+                      subtitle: "Anuncios semanales",
+                      color: const Color(0xFFC9F0FF),
+                      icon: Icons.campaign,
                       onTap: () {
                         Navigator.pushNamed(context, "/heatingSystem");
                       },
