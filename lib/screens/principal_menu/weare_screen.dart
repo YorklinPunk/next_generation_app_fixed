@@ -6,10 +6,10 @@ class WeAreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFf8e152),
+      backgroundColor: const Color(0xFFEBD8FD),
       appBar: AppBar(
         title: const Text("Somos Next Generation", style: TextStyle(color: Colors.black)),
-        backgroundColor: const Color(0xFFf8e152),
+        backgroundColor: const Color(0xFFEBD8FD),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),

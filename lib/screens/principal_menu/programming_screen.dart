@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:next_generation_app_fixed/db/mongo_database.dart'; // Asegúrate de tener esta clase
+import 'package:next_generation_app_fixed/models/list_programming_model.dart';
 import 'package:next_generation_app_fixed/models/programming_model.dart';
 import 'package:next_generation_app_fixed/utils/dialog_helper.dart'; // tu función de dialog
 
@@ -11,7 +12,7 @@ class ProgrammingScreen extends StatefulWidget {
 }
 
 class _ProgrammingScreenState extends State<ProgrammingScreen> {
-  List<ProgrammingModel> _allProgrammings = [];
+  List<ListProgrammingModel> _allProgrammings = [];
   ProgrammingModel? _thisWeekProgramming;
   bool loading = true;
 
@@ -92,10 +93,7 @@ class _ProgrammingScreenState extends State<ProgrammingScreen> {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: p.roles
-                          .map((r) => Text("${r.nombreRol}: ${r.nombresAsignados.join(", ")}"))
-                          .toList(),
+                      crossAxisAlignment: CrossAxisAlignment.start
                     ),
                   ),
                 );

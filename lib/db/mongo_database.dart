@@ -1,4 +1,5 @@
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:next_generation_app_fixed/models/list_programming_model.dart';
 import '../models/programming_model.dart';
 import '../models/user_model.dart';
 import '../models/ministry_model.dart';
@@ -131,9 +132,9 @@ class MongoDatabase {
     }
   }
 
-  static Future<List<ProgrammingModel>> getAllProgrammings() async {
+  static Future<List<ListProgrammingModel>> getAllProgrammings() async {
     final result = await MongoDatabase.programmingCollection.find().toList();
-    return result.map((e) => ProgrammingModel.fromMap(e)).toList();
+    return result.map((e) => ListProgrammingModel.fromMap(e)).toList();
   }
 
   static Future<ProgrammingModel> latestOfCurrentWeek() async {
