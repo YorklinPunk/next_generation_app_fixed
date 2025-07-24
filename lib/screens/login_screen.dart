@@ -133,8 +133,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: () async  {
                         //                       
-                        final username = _usernameController.text.trim();
-                        final password = _passwordController.text.trim();
+                        final username = "ylazaro";
+                        final password = "12345678";
+                        
+                        // final username = _usernameController.text.trim();
+                        // final password = _passwordController.text.trim();
 
                         if (username.isEmpty || password.isEmpty) {
                           showCustomDialog(context, "Todos los campos son obligatorios", 3);

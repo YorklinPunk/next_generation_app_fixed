@@ -134,6 +134,10 @@ class MongoDatabase {
 
   static Future<List<ListProgrammingModel>> getAllProgrammings() async {
     final result = await MongoDatabase.programmingCollection.find().toList();
+    if(result.isEmpty) {
+      print("No hay programaciones registradas.");
+      return [];
+    }
     return result.map((e) => ListProgrammingModel.fromMap(e)).toList();
   }
 

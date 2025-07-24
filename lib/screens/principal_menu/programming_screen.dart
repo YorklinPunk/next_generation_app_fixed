@@ -53,52 +53,64 @@ class _ProgrammingScreenState extends State<ProgrammingScreen> {
         });
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          showCustomDialog(context, "Aún no hay programación para esta semana.", 3);
-          // showDialog(
-          //   context: context,
-          //   builder: (context) => AlertDialog(
-          //     title: const Text("Sin programación"),
-          //     content: const Text("Aún no hay programación para esta semana."),
-          //     actions: [
-          //       TextButton(
-          //         onPressed: () => Navigator.pop(context),
-          //         child: const Text("Cerrar"),
-          //       )
-          //     ],
-          //   ),
-          // );
+          showCustomDialog(context, "Aún no hay programación para esta semana.", 4);
         });
       }
+
+
     } catch (e) {
       debugPrint("Error al cargar programación: $e");
       setState(() => loading = false);
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Programaciones")),
+      appBar: AppBar(title: const Text("Programación Semanal")),
       body: loading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _allProgrammings.length,
-              itemBuilder: (context, index) {
-                final p = _allProgrammings[index];
-                return Card(
-                  margin: const EdgeInsets.all(8),
-                  child: ListTile(
-                    title: Text(
-                      "Semana de: ${p.fechaHoraPogramacion.toLocal().toString().split(" ")[0]}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start
-                    ),
+          : _allProgrammings.isEmpty
+              ? const Center(
+                  child: Text(
+                    "No hay programaciones",
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
-                );
-              },
-            ),
+                )
+              : ListView.builder(
+                  itemCount: _allProgrammings.length,
+                  itemBuilder: (context, index) {
+                    final p = _allProgrammings[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          child: Text('${index + 1}'),
+                          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                          foregroundColor: Colors.white,
+                        ),
+                        title: Text(
+                          "Fecha: ${p.fechaHoraPogramacion.toLocal().toString().split(" ")[0]}",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text("Editado por: ${p.nomUsuarioEdicion}"),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.visibility),
+                          tooltip: "Ver programación",
+                          onPressed: () {
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => ProgrammingDetailScreen(id: p.id!),
+                            //   ),
+                            // );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }
