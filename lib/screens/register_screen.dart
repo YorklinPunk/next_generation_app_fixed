@@ -6,7 +6,7 @@ import 'package:next_generation_app_fixed/utils/dialog_helper.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();

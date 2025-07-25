@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:next_generation_app_fixed/models/user_model.dart';
+import 'package:next_generation_app_fixed/screens/principal_menu/report_screen.dart';
 import 'package:next_generation_app_fixed/screens/principal_menu/weare_screen.dart';
 import 'package:next_generation_app_fixed/screens/principal_menu/programming_screen.dart';
 
@@ -107,7 +108,10 @@ class PrincipalScreen extends StatelessWidget {
                       color: const Color(0xFFFFD3C3),
                       icon: Icons.bar_chart,
                       onTap: () {
-                        Navigator.pushNamed(context, "/heatingSystem");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ReportScreen()),
+                        );
                       },
                     ),
                     _smartCard(
