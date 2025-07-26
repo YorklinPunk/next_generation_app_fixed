@@ -110,7 +110,9 @@ class PrincipalScreen extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const ReportScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => ReportScreen(user: user)
+                          ),
                         );
                       },
                     ),

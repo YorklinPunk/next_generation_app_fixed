@@ -1,8 +1,10 @@
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:next_generation_app_fixed/models/list_programming_model.dart';
+import 'package:next_generation_app_fixed/models/report_model.dart';
 import '../models/programming_model.dart';
 import '../models/user_model.dart';
 import '../models/ministry_model.dart';
+import '../models/generic_model/operation_result_model.dart';
 
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
@@ -15,6 +17,7 @@ class MongoDatabase {
   static var checkinsCollection;
   static var ministriesCollection;
   static var programmingCollection;
+  static var ReportCollection;
 
   static Future<void> connect() async {
     db = await Db.create(
@@ -30,6 +33,7 @@ class MongoDatabase {
     checkinsCollection = db.collection("checkins");
     ministriesCollection = db.collection("ministries");
     programmingCollection = db.collection("programming");
+    ReportCollection = db.collection("reports");
   }
 
   //Hash de contraseña
@@ -54,46 +58,119 @@ class MongoDatabase {
   //   }
   // }
 
-  static Future<List<UserModel>> getUsers() async {
-    final docs = await userCollection.find().toList();
-    return docs.map((doc) => UserModel.fromMap(doc)).toList();
+  static Future<OperationResultGeneric<List<UserModel>>> getUsers() async {
+    var response = OperationResultGeneric<List<UserModel>>(
+      isValid: false,
+      exceptions: [],
+      content: [],
+    );
+    try {
+      final docs = await userCollection.find().toList();
+      response.isValid = true; // Si llegamos aquí, la consulta fue exitosa
+      response.content = docs.map((doc) => UserModel.fromMap(doc)).toList();
+      return response;
+    } catch (e) {
+      response.exceptions.add(OperationException('fetch_error', 'Error al obtener usuarios: $e'));
+      return response;
+    }
   }
 
-  static Future<bool> existeUsername(String username) async {
-    final user = await userCollection.findOne({'username': username});
-    return user != null;
+  static Future<OperationResultGeneric<String>> existeUsername(String username) async {
+    var response = OperationResultGeneric<String>(
+      isValid: false,
+      exceptions: [],
+      content: '',
+    );
+
+    try {
+      final user = await userCollection.findOne({'username': username});
+      response.isValid = user != null; // Si el usuario existe, es válido
+      if (response.isValid) {
+        response.content = "El nombre de usuario ya existe.";
+      } else {
+        response.content = "El nombre de usuario está disponible.";
+      }
+    }
+    catch (e){
+      response.exceptions.add(OperationException('fetch_error', 'Error al verificar el nombre de usuario: $e'));
+      return response;
+    }
+    return response; // Ensure a response is always returned
   }
 
-  static Future<bool> existeDocumento(String document) async {
-    final user = await userCollection.findOne({'document': document});
-    return user != null;
+  static Future<OperationResultGeneric<String>> existeDocumento(String document) async {
+    var response = OperationResultGeneric<String>(
+      isValid: false,
+      exceptions: [],
+      content: '',
+    );
+
+    try {
+      final user = await userCollection.findOne({'document': document});
+      response.isValid = user != null; // Si el usuario existe, es válido
+      if (response.isValid) {
+        response.content = "El DNI ya está registrado.";
+      } else {
+        response.content = "El DNI está disponible.";
+      }
+    } catch (e) {
+      response.exceptions.add(OperationException('fetch_error', 'Error al verificar el DNI: $e'));
+      return response;
+    }
+    return response; // Ensure a response is always returned
   }
 
 
   //LISTA DE MINISTERIOS
-  static Future<List<MinistryModel>> getMinistries() async {
+  static Future<OperationResultGeneric<List<MinistryModel>>> getMinistries() async {
+    var response = OperationResultGeneric<List<MinistryModel>>(
+      isValid: false,
+      exceptions: [],
+      content: [],
+    );
     try {
       final results = await ministriesCollection.find().toList();
-
-      final ministries = results.map((doc) {
-        final map = Map<String, dynamic>.from(doc); // conversión explícita
-        if (map['status'] == 1 && map.containsKey('codMinistry')) {
-          return MinistryModel.fromMap(map);
-        }
-        // Validar que los campos existan
-        if (map.containsKey('codMinistry') && map.containsKey('nomMinistry')) {
-          return MinistryModel.fromMap(map);
-        } else {
-          print("❌ Registro inválido: $map");
-          return null;
-        }
-      }).whereType<MinistryModel>().toList();
-
-      return ministries;
+      if (results.isEmpty) {
+        results.content = [];
+      }
+      response.isValid = true; 
+      response.content = results.map((doc) {
+                final map = Map<String, dynamic>.from(doc); // conversión explícita
+                  if (map['status'] == 1 && map.containsKey('codMinistry')) {
+                    return MinistryModel.fromMap(map);
+                  }
+                  // Validar que los campos existan
+                  if (map.containsKey('codMinistry') && map.containsKey('nomMinistry')) {
+                    return MinistryModel.fromMap(map);
+                  } else {
+                    return null;
+                  }
+                }).whereType<MinistryModel>().toList();
+      return response; // Retorna la lista de ministerios
     } catch (e) {
-      print("❌ Error al obtener ministerios: $e");
-      return [];
+      response.exceptions.add(OperationException('fetch_error', 'Error al obtener ministerios: $e'));
+      return response; // Retorna el error si ocurre una excepción
     }
+
+      // final ministries = results.map((doc) {
+      //   final map = Map<String, dynamic>.from(doc); // conversión explícita
+      //   if (map['status'] == 1 && map.containsKey('codMinistry')) {
+      //     return MinistryModel.fromMap(map);
+      //   }
+      //   // Validar que los campos existan
+      //   if (map.containsKey('codMinistry') && map.containsKey('nomMinistry')) {
+      //     return MinistryModel.fromMap(map);
+      //   } else {
+      //     print("❌ Registro inválido: $map");
+      //     return null;
+      //   }
+      // }).whereType<MinistryModel>().toList();
+
+      // return ministries;
+    // } catch (e) {
+    //   print("❌ Error al obtener ministerios: $e");
+    //   return [];
+    // }
   }
 
 
@@ -174,4 +251,86 @@ class MongoDatabase {
   }
 
 
+  //CRU Report
+  static Future<OperationResultGeneric<String>> insertReport(ReportModel report) async {
+    var response = OperationResultGeneric<String>(
+      isValid: false,
+      exceptions: [],
+      content: '',
+    );
+
+    try {
+      final result = await ReportCollection.insertOne(report.toMap());
+
+      response.isValid = result.isSuccess; // asumiendo que result tiene isSuccess
+      response.content = "Reporte insertado con éxito";
+      return response;
+    } catch (e) {
+      response.exceptions.add(OperationException('insert_error', 'Error al insertar reporte: $e'));
+      return response;
+    }
+  }
+
+  static Future<OperationResultGeneric<List<ReportModel>>> getAllReports() async {
+    var response = OperationResultGeneric<List<ReportModel>>(
+      isValid: false,
+      exceptions: [],
+      content: [],
+    );
+
+    try {
+      final results = await ReportCollection.find().toList();
+      response.isValid = true; // Si llegamos aquí, la consulta fue exitosa
+      response.content = results.map((doc) => ReportModel.fromMap(doc)).toList();
+      return response;
+    } catch (e) {
+      response.exceptions.add(OperationException('fetch_error', 'Error al obtener reportes: $e'));
+      return response;
+    }
+  }
+
+  static Future<OperationResultGeneric<ReportModel?>> getLatestReport() async {
+    var response = OperationResultGeneric<ReportModel?>(
+      isValid: false,
+      exceptions: [],
+      content: null,
+    );
+
+    try {
+      final result = await ReportCollection.find().sort({'Fecha': -1}).limit(1).toList();
+      response.isValid = true; // Si llegamos aquí, la consulta fue exitosa
+      response.content = result.isNotEmpty ? ReportModel.fromMap(result.first) : null;
+      return response;      
+    } catch (e) {
+      response.exceptions.add(OperationException('fetch_error', 'Error al obtener el último reporte: $e'));
+      return response;
+    }
+  }
+
+  static Future<OperationResultGeneric<String>> editReport(ReportModel report) async {
+    var response = OperationResultGeneric<String>(
+      isValid: false,
+      exceptions: [],
+      content: '',
+    );
+    try {
+      if (report.id == null) {
+        response.exceptions.add(OperationException('update_error', 'No se puede actualizar: id nulo'));
+        return response;
+      }
+
+      final result = await ReportCollection.updateOne(
+        where.id(report.id!),
+        modify
+          ..set('ministries', report.ministries.map((e) => e.toMap()).toList()),
+      );
+      response.isValid = result.isSuccess; // asumiendo que result tiene isSuccess
+      response.content = "Reporte actualizado con éxito";      
+      return response;
+
+    } catch (e) {
+      response.exceptions.add(OperationException('update_error', 'Error al actualizar reporte: $e'));
+      return response;
+    }
+  }
 }

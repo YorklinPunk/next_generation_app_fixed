@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:next_generation_app_fixed/models/user_model.dart';
 import 'package:next_generation_app_fixed/db/mongo_database.dart';
 import 'package:next_generation_app_fixed/models/ministry_model.dart';
 import 'package:next_generation_app_fixed/models/report_model.dart'; // Asegúrate de tener este archivo
-import 'package:intl/intl.dart';
 
 class ReportScreen extends StatefulWidget {
-  const ReportScreen({super.key});
+  final UserModel user;
+  const ReportScreen({super.key, required this.user});
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();
@@ -19,13 +20,13 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   void initState() {
     super.initState();
-    _cargarMinistries();
+    _cargarMinistries();    
   }
 
   Future<void> _cargarMinistries() async {
     final data = await MongoDatabase.getMinistries();
     setState(() {
-      _ministries = data;
+      _ministries = data.content;
     });
   }
 
@@ -46,11 +47,12 @@ class _ReportScreenState extends State<ReportScreen> {
         codMinistry: _ministries[index].codMinistry,
         nomMinistry: _ministries[index].nomMinistry,
         cantidad: newCantidad,
-        nomUsuarioEdit: "YLazaro", // <- cámbialo si es dinámico
+        nomUsuarioEdit: widget.user.username, // <- cámbialo si es dinámico
         fechaHoraEdit: DateTime.now(),
       );
 
       final report = ReportModel(
+        id: null, // MongoDB genera un ID automáticamente
         Fecha: DateTime.now(),
         ministries: [detalle],
       );
@@ -85,8 +87,17 @@ class _ReportScreenState extends State<ReportScreen> {
                 final ministry = _ministries[index];
                 final isEditing = _isEditing[index] ?? false;
 
+                
                 return GestureDetector(
-                  onDoubleTap: () => _startEditing(index),
+                  onDoubleTap: () => {
+                    if( widget.user.ministry == ministry.codMinistry){
+                      _startEditing(index)
+                    }else{
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("No tienes permiso para editar ${ministry.nomMinistry}")),
+                      )
+                    }
+                  },
                   child: Card(
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     child: ListTile(

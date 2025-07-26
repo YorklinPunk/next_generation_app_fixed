@@ -37,13 +37,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _cargarMinistries() async {
     final data = await MongoDatabase.getMinistries();
-    data.insert(0, MinistryModel(
+    data.content.insert(0, MinistryModel(
       codMinistry: 0,
       nomMinistry: "-- Seleccione un ministerio --"
     ));
 
     setState(() {
-      _ministries = data;
+      _ministries = data.content;
     });
     
     setState(() {
@@ -73,13 +73,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final password = _passwordController.text.trim();
 
       // Validaciones específicas
-      if (await MongoDatabase.existeUsername(username)) {
-        showCustomDialog(context, "El nombre de usuario ya está registrado", 2);
+      final validUsername = await MongoDatabase.existeUsername(username);
+      final validDni = await MongoDatabase.existeDocumento(document);
+
+      if (validUsername.isValid) {
+        showCustomDialog(context, validUsername.content, 2);
         return;
       }
 
-      if (await MongoDatabase.existeDocumento(document)) {
-        showCustomDialog(context, "El DNI ya está registrado", 2);
+      if (validDni.isValid) {
+        showCustomDialog(context, validDni.content, 2);
         return;
       }
 
