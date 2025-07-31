@@ -20,7 +20,8 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   void initState() {
     super.initState();
-    _cargarMinistries();    
+    _cargarMinistries();
+    _getLatestReport();
   }
 
   Future<void> _cargarMinistries() async {
@@ -28,6 +29,19 @@ class _ReportScreenState extends State<ReportScreen> {
     setState(() {
       _ministries = data.content;
     });
+  }
+
+  Future<void> _getLatestReport() async {
+    final report = await MongoDatabase.getLatestReport();
+    if (report.content != null && report.content.length > 0) {
+      final latestReport = report.content.first;
+      // Aquí puedes procesar el reporte, por ejemplo, mostrar un diálogo o actualizar la UI
+      print("Último reporte encontrado: ${latestReport.fecha}");
+      // Puedes actualizar la UI con los datos del reporte si es necesario
+
+    } else {
+      print("No se encontró ningún reporte.");
+    }
   }
 
   void _startEditing(int index) {
@@ -53,7 +67,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
       final report = ReportModel(
         id: null, // MongoDB genera un ID automáticamente
-        Fecha: DateTime.now(),
+        fecha: DateTime.now(),
         ministries: [detalle],
       );
 
@@ -101,23 +115,27 @@ class _ReportScreenState extends State<ReportScreen> {
                   child: Card(
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     child: ListTile(
-                      leading: CircleAvatar(child: Text("${index + 1}")),
+                      // leading: CircleAvatar(child: Text("${index + 1}")),
                       title: Text(ministry.nomMinistry),
-                      trailing: isEditing
-                          ? SizedBox(
-                              width: 60,
-                              child: Focus(
-                                onFocusChange: (hasFocus) {
-                                  if (!hasFocus) _stopEditing(index);
-                                },
-                                child: TextField(
-                                  controller: _controllers[index],
-                                  keyboardType: TextInputType.number,
-                                  autofocus: true,
-                                ),
-                              ),
-                            )
-                          : const Icon(Icons.edit),
+                      trailing: SizedBox(
+                        width: 25,
+                        child: isEditing ?
+                        Focus(
+                          onFocusChange: (hasFocus) {
+                            if (!hasFocus) _stopEditing(index);
+                          },
+                          child: TextField(
+                            controller: _controllers[index],
+                            keyboardType: TextInputType.number,
+                            autofocus: true,
+                          ),
+                        )
+                        :Text("0", // Aquí puedes mostrar la cantidad actual si la tienes
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black54,),
+                        ),
+                      ),
                     ),
                   ),
                 );

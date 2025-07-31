@@ -2,18 +2,18 @@ import 'package:mongo_dart/mongo_dart.dart';
 
 class ReportModel {
   final ObjectId? id;
-  final DateTime Fecha;
+  final DateTime fecha;
   final List<MinistryDetail> ministries;
 
   ReportModel({
     required this.id,
-    required this.Fecha,
+    required this.fecha,
     required this.ministries,
   });
   factory ReportModel.fromMap(Map<String, dynamic> map) {
     return ReportModel(
       id: map['_id'] as ObjectId?,
-      Fecha: DateTime.parse(map['Fecha'] ?? DateTime.now().toIso8601String()),
+      fecha: DateTime.parse(map['fecha'] ?? DateTime.now().toIso8601String()),
       ministries: (map['ministries'] as List<dynamic>)
           .map((e) => MinistryDetail.fromMap(e as Map<String, dynamic>))
           .toList(),
@@ -23,7 +23,7 @@ class ReportModel {
   Map<String, dynamic> toMap() {
     return {
       if (id != null) '_id': id,
-      'Fecha': Fecha.toIso8601String(),
+      'fecha': fecha.toIso8601String(),
       'ministries': ministries.map((e) => e.toMap()).toList(),
     };
   }

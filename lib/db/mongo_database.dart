@@ -300,7 +300,7 @@ class MongoDatabase {
       final result = await ReportCollection.find().sort({'Fecha': -1}).limit(1).toList();
       response.isValid = true; // Si llegamos aquí, la consulta fue exitosa
       response.content = result.isNotEmpty ? ReportModel.fromMap(result.first) : null;
-      return response;      
+      return response;
     } catch (e) {
       response.exceptions.add(OperationException('fetch_error', 'Error al obtener el último reporte: $e'));
       return response;
