@@ -6,13 +6,13 @@ class ReportModel {
   final List<MinistryDetail> ministries;
 
   ReportModel({
-    required this.id,
+    this.id,
     required this.fecha,
     required this.ministries,
   });
   factory ReportModel.fromMap(Map<String, dynamic> map) {
     return ReportModel(
-      id: map['_id'] as ObjectId?,
+      id: map['_id'],
       fecha: DateTime.parse(map['fecha'] ?? DateTime.now().toIso8601String()),
       ministries: (map['ministries'] as List<dynamic>)
           .map((e) => MinistryDetail.fromMap(e as Map<String, dynamic>))
@@ -22,7 +22,6 @@ class ReportModel {
 
   Map<String, dynamic> toMap() {
     return {
-      if (id != null) '_id': id,
       'fecha': fecha.toIso8601String(),
       'ministries': ministries.map((e) => e.toMap()).toList(),
     };

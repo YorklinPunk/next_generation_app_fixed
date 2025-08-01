@@ -32,16 +32,48 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Future<void> _getLatestReport() async {
-    final report = await MongoDatabase.getLatestReport();
-    if (report.content != null && report.content.length > 0) {
-      final latestReport = report.content.first;
-      // Aquí puedes procesar el reporte, por ejemplo, mostrar un diálogo o actualizar la UI
-      print("Último reporte encontrado: ${latestReport.fecha}");
-      // Puedes actualizar la UI con los datos del reporte si es necesario
+    final reportResult = await MongoDatabase.getLatestReport();
+    ReportModel? latestReport = reportResult.content;
 
+    if (latestReport!.ministries.length > 0) {
+      _ministries = latestReport.ministries.map((e) => MinistryModel(
+        codMinistry: e.codMinistry,
+        nomMinistry: e.nomMinistry,
+      )).toList();
+      print("último reporte encontrado: ${latestReport.fecha}");
     } else {
-      print("No se encontró ningún reporte.");
+      // Crear uno vacío
+      List<MinistryDetail> ministryDetails = [];
+      for (var ministry in _ministries) {
+        ministryDetails.add(MinistryDetail(
+          codMinistry: ministry.codMinistry,
+          nomMinistry: ministry.nomMinistry,
+          cantidad: 0,
+          nomUsuarioEdit: widget.user.username,
+          fechaHoraEdit: DateTime.now(),
+        ));
+      }
+      latestReport = ReportModel(
+        fecha: DateTime.now(),
+        ministries: ministryDetails,
+      );
+      print("No se encontró ningún reporte ${latestReport.fecha}");
     }
+
+    // ReportModel? latestReport = null;
+
+    // if (report.content != null ) {
+    //   latestReport = report.content!;
+    //   // Aquí puedes procesar el reporte, por ejemplo, mostrar un diálogo o actualizar la UI
+    //   print("Último reporte encontrado: ${latestReport.fecha}");
+    //   // Puedes actualizar la UI con los datos del reporte si es necesario
+
+    // } else {
+    //   latestReport.fecha = DateTime.now();
+    //   latestReport.ministries = [];
+
+    //   print("No se encontró ningún reporte.");
+    // }
   }
 
   void _startEditing(int index) {
@@ -65,8 +97,7 @@ class _ReportScreenState extends State<ReportScreen> {
         fechaHoraEdit: DateTime.now(),
       );
 
-      final report = ReportModel(
-        id: null, // MongoDB genera un ID automáticamente
+      final report = ReportModel( // MongoDB genera un ID automáticamente
         fecha: DateTime.now(),
         ministries: [detalle],
       );
