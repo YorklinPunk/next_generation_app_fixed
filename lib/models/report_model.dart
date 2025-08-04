@@ -31,9 +31,9 @@ class ReportModel {
 class MinistryDetail {
   final int codMinistry;
   final String nomMinistry;
-  final int cantidad;
-  final String nomUsuarioEdit;
-  final DateTime fechaHoraEdit;
+  int cantidad;
+  String nomUsuarioEdit;
+  DateTime fechaHoraEdit;
 
   MinistryDetail({
     required this.codMinistry,

@@ -14,6 +14,10 @@ class ReportScreen extends StatefulWidget {
 
 class _ReportScreenState extends State<ReportScreen> {
   List<MinistryModel> _ministries = [];
+  ReportModel _latestReport = ReportModel(
+    fecha: DateTime.now(),
+    ministries: [],
+  );
   final Map<int, TextEditingController> _controllers = {};
   final Map<int, bool> _isEditing = {};
 
@@ -35,46 +39,38 @@ class _ReportScreenState extends State<ReportScreen> {
     final reportResult = await MongoDatabase.getLatestReport();
     ReportModel? latestReport = reportResult.content;
 
-    if (latestReport!.ministries.length > 0) {
-      _ministries = latestReport.ministries.map((e) => MinistryModel(
-        codMinistry: e.codMinistry,
-        nomMinistry: e.nomMinistry,
-      )).toList();
+    if (latestReport != null && latestReport.ministries.isNotEmpty) {
+      setState(() {
+        _latestReport = latestReport;
+        _ministries = latestReport.ministries.map((e) => MinistryModel(
+          codMinistry: e.codMinistry,
+          nomMinistry: e.nomMinistry,
+        )).toList();
+      });
       print("último reporte encontrado: ${latestReport.fecha}");
     } else {
-      // Crear uno vacío
-      List<MinistryDetail> ministryDetails = [];
-      for (var ministry in _ministries) {
-        ministryDetails.add(MinistryDetail(
+      // Crear uno vacío basado en _ministries ya cargado
+      List<MinistryDetail> ministryDetails = _ministries.map((ministry) {
+        return MinistryDetail(
           codMinistry: ministry.codMinistry,
           nomMinistry: ministry.nomMinistry,
           cantidad: 0,
           nomUsuarioEdit: widget.user.username,
           fechaHoraEdit: DateTime.now(),
-        ));
-      }
-      latestReport = ReportModel(
-        fecha: DateTime.now(),
-        ministries: ministryDetails,
-      );
-      print("No se encontró ningún reporte ${latestReport.fecha}");
+        );
+      }).toList();
+
+      setState(() {
+        _latestReport = ReportModel(
+          fecha: DateTime.now(),
+          ministries: ministryDetails,
+        );
+      });
+
+      print("No se encontró ningún reporte. Se generó uno nuevo.");
     }
-
-    // ReportModel? latestReport = null;
-
-    // if (report.content != null ) {
-    //   latestReport = report.content!;
-    //   // Aquí puedes procesar el reporte, por ejemplo, mostrar un diálogo o actualizar la UI
-    //   print("Último reporte encontrado: ${latestReport.fecha}");
-    //   // Puedes actualizar la UI con los datos del reporte si es necesario
-
-    // } else {
-    //   latestReport.fecha = DateTime.now();
-    //   latestReport.ministries = [];
-
-    //   print("No se encontró ningún reporte.");
-    // }
   }
+
 
   void _startEditing(int index) {
     setState(() {
@@ -83,26 +79,45 @@ class _ReportScreenState extends State<ReportScreen> {
     });
   }
 
-  void _stopEditing(int index) {
+  void _stopEditing(int index) async {
     final controller = _controllers[index];
     final newCantidad = int.tryParse(controller?.text ?? "");
+    
+    final i = _latestReport.ministries.indexWhere(
+      (m) => m.codMinistry == _ministries[index].codMinistry,
+    );
 
-    if (newCantidad != null) {
-      // Guardar los datos
-      final detalle = MinistryDetail(
-        codMinistry: _ministries[index].codMinistry,
-        nomMinistry: _ministries[index].nomMinistry,
-        cantidad: newCantidad,
-        nomUsuarioEdit: widget.user.username, // <- cámbialo si es dinámico
-        fechaHoraEdit: DateTime.now(),
+    if (i == -1) return;
+
+    final currentMinistry = _latestReport.ministries[i];
+
+    // Si no hay cambios en la cantidad, salir sin guardar
+    if (newCantidad == currentMinistry.cantidad) {
+      setState(() {
+        _isEditing[index] = false;
+        _controllers[index]?.dispose();
+        _controllers.remove(index);
+      });
+      return;
+    }
+
+    currentMinistry.cantidad = newCantidad ?? 0;
+    currentMinistry.nomUsuarioEdit = widget.user.username;
+    currentMinistry.fechaHoraEdit = DateTime.now();
+     try {
+      if (_latestReport.id != null) {
+        await MongoDatabase.editReport(_latestReport);
+      } else {
+        await MongoDatabase.insertReport(_latestReport);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Reporte guardado correctamente')),
       );
-
-      final report = ReportModel( // MongoDB genera un ID automáticamente
-        fecha: DateTime.now(),
-        ministries: [detalle],
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al guardar el reporte')),
       );
-
-      //MongoDatabase.saveReport(report);
     }
 
     setState(() {
