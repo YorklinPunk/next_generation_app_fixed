@@ -297,12 +297,26 @@ class MongoDatabase {
     );
 
     try {
-      final result = await ReportCollection.find().sort({'Fecha': -1}).limit(1).toList();
-      response.isValid = true; // Si llegamos aquí, la consulta fue exitosa
+      final now = DateTime.now();
+      final startOfWeek = DateTime(now.year, now.month, now.day - (now.weekday - 1));
+      final endOfWeek = startOfWeek.add(const Duration(days: 6));
+
+      final query = where
+          .gte("fecha", startOfWeek)
+          .lte("fecha", endOfWeek)
+          .sortBy("fecha", descending: true)
+          .limit(1);
+
+      final result = await ReportCollection.find(query).toList();
+
+      response.isValid = true;
       response.content = result.isNotEmpty ? ReportModel.fromMap(result.first) : null;
       return response;
+
     } catch (e) {
-      response.exceptions.add(OperationException('fetch_error', 'Error al obtener el último reporte: $e'));
+      response.exceptions.add(
+        OperationException('fetch_error', 'Error al obtener el último reporte: $e'),
+      );
       return response;
     }
   }

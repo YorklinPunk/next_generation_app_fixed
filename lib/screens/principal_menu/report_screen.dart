@@ -24,8 +24,12 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   void initState() {
     super.initState();
-    _cargarMinistries();
-    _getLatestReport();
+    _initData();
+  }
+
+  Future<void> _initData() async {
+    await _cargarMinistries();
+    await _getLatestReport();
   }
 
   Future<void> _cargarMinistries() async {
@@ -80,6 +84,7 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   void _stopEditing(int index) async {
+    print("Guardando cambios para el ministerio en el índice $index");
     final controller = _controllers[index];
     final newCantidad = int.tryParse(controller?.text ?? "");
     
@@ -106,8 +111,10 @@ class _ReportScreenState extends State<ReportScreen> {
     currentMinistry.fechaHoraEdit = DateTime.now();
      try {
       if (_latestReport.id != null) {
+        print("Editando reporte existente");
         await MongoDatabase.editReport(_latestReport);
       } else {
+        print("Insertando nuevo reporte");
         await MongoDatabase.insertReport(_latestReport);
       }
 
@@ -168,7 +175,10 @@ class _ReportScreenState extends State<ReportScreen> {
                         child: isEditing ?
                         Focus(
                           onFocusChange: (hasFocus) {
-                            if (!hasFocus) _stopEditing(index);
+                            if (!hasFocus) {
+                              print("Se perdió el foco");
+                              _stopEditing(index);
+                            }
                           },
                           child: TextField(
                             controller: _controllers[index],
