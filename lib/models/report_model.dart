@@ -13,7 +13,9 @@ class ReportModel {
   factory ReportModel.fromMap(Map<String, dynamic> map) {
     return ReportModel(
       id: map['_id'],
-      fecha: DateTime.parse(map['fecha'] ?? DateTime.now().toIso8601String()),
+      fecha: map['fecha'] is DateTime
+          ? map['fecha']
+          : DateTime.parse(map['fecha'].toString()),
       ministries: (map['ministries'] as List<dynamic>)
           .map((e) => MinistryDetail.fromMap(e as Map<String, dynamic>))
           .toList(),
@@ -22,7 +24,7 @@ class ReportModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'fecha': fecha.toIso8601String(),
+      'fecha': fecha,
       'ministries': ministries.map((e) => e.toMap()).toList(),
     };
   }
@@ -49,7 +51,9 @@ class MinistryDetail {
       nomMinistry: map['nomMinistry'] ?? '',
       cantidad: map['cantidad'] ?? 0,
       nomUsuarioEdit: map['nomUsuarioEdit'] ?? '',
-      fechaHoraEdit: DateTime.parse(map['fechaHoraEdit'] ?? DateTime.now().toIso8601String()),
+      fechaHoraEdit: map['fechaHoraEdit'] is DateTime
+          ? map['fechaHoraEdit']
+          : DateTime.parse(map['fechaHoraEdit'].toString()),
     );
   }
 
@@ -59,7 +63,7 @@ class MinistryDetail {
       'nomMinistry': nomMinistry,
       'cantidad': cantidad,
       'nomUsuarioEdit': nomUsuarioEdit,
-      'fechaHoraEdit': fechaHoraEdit.toIso8601String(),
+      'fechaHoraEdit': fechaHoraEdit,
     };
   }
 }

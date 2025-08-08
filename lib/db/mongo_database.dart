@@ -151,26 +151,6 @@ class MongoDatabase {
       response.exceptions.add(OperationException('fetch_error', 'Error al obtener ministerios: $e'));
       return response; // Retorna el error si ocurre una excepción
     }
-
-      // final ministries = results.map((doc) {
-      //   final map = Map<String, dynamic>.from(doc); // conversión explícita
-      //   if (map['status'] == 1 && map.containsKey('codMinistry')) {
-      //     return MinistryModel.fromMap(map);
-      //   }
-      //   // Validar que los campos existan
-      //   if (map.containsKey('codMinistry') && map.containsKey('nomMinistry')) {
-      //     return MinistryModel.fromMap(map);
-      //   } else {
-      //     print("❌ Registro inválido: $map");
-      //     return null;
-      //   }
-      // }).whereType<MinistryModel>().toList();
-
-      // return ministries;
-    // } catch (e) {
-    //   print("❌ Error al obtener ministerios: $e");
-    //   return [];
-    // }
   }
 
 

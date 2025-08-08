@@ -46,10 +46,6 @@ class _ReportScreenState extends State<ReportScreen> {
     if (latestReport != null && latestReport.ministries.isNotEmpty) {
       setState(() {
         _latestReport = latestReport;
-        _ministries = latestReport.ministries.map((e) => MinistryModel(
-          codMinistry: e.codMinistry,
-          nomMinistry: e.nomMinistry,
-        )).toList();
       });
       print("último reporte encontrado: ${latestReport.fecha}");
     } else {
@@ -59,7 +55,7 @@ class _ReportScreenState extends State<ReportScreen> {
           codMinistry: ministry.codMinistry,
           nomMinistry: ministry.nomMinistry,
           cantidad: 0,
-          nomUsuarioEdit: widget.user.username,
+          nomUsuarioEdit: widget.user.ministry == ministry.codMinistry ? widget.user.username : "",
           fechaHoraEdit: DateTime.now(),
         );
       }).toList();
@@ -146,18 +142,18 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Reporte de Ministerios")),
-      body: _ministries.isEmpty
+      body: _latestReport.ministries.isEmpty
           ? const Center(child: Text("No hay ministerios disponibles"))
           : ListView.builder(
-              itemCount: _ministries.length,
+              itemCount: _latestReport.ministries.length,
               itemBuilder: (context, index) {
-                final ministry = _ministries[index];
+                final ministry = _latestReport.ministries[index];
                 final isEditing = _isEditing[index] ?? false;
 
                 
                 return GestureDetector(
                   onDoubleTap: () => {
-                    if( widget.user.ministry == ministry.codMinistry){
+                    if( widget.user.ministry == ministry.codMinistry || widget.user.role == 1 ){
                       _startEditing(index)
                     }else{
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -186,7 +182,7 @@ class _ReportScreenState extends State<ReportScreen> {
                             autofocus: true,
                           ),
                         )
-                        :Text("0", // Aquí puedes mostrar la cantidad actual si la tienes
+                        :Text(ministry.cantidad.toString(), // Aquí puedes mostrar la cantidad actual si la tienes
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.black54,),
