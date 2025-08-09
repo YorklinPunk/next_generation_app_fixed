@@ -3,6 +3,7 @@ class UserModel {
   final String lastName;
   final String document;
   final String username;
+  final DateTime birthday;
   final int ministry;
   final String password;
   final int role;
@@ -14,6 +15,7 @@ class UserModel {
     required this.lastName,
     required this.document,
     required this.username,
+    required this.birthday,
     required this.ministry,
     required this.password,
     required this.role,
@@ -28,11 +30,12 @@ class UserModel {
       'lastName': lastName,
       'document': document,
       'username': username,
+      'birthday': birthday,
       'ministry': ministry,
       'password': password,
       'role': role,
       'state': state,
-      'dateRegistration': dateRegistration.toIso8601String(),
+      'dateRegistration': dateRegistration,
     };
   }
 
@@ -43,6 +46,9 @@ class UserModel {
       lastName: map['lastName'],
       document: map['document'],
       username: map['username'],
+      birthday: map['birthday'] is DateTime
+          ? map['birthday']
+          : DateTime.parse(map['birthday'].toString()),
       ministry: map['ministry'],
       password: map['password'],
       role: map['role'],

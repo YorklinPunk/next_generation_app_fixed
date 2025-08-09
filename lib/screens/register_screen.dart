@@ -17,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _documentController = TextEditingController();
+  final _birthdayController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _verPassword = false;
@@ -70,6 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (_formKey.currentState!.validate()) {
       final username = _usernameController.text.trim();
       final document = _documentController.text.trim();
+      final birthday = _birthdayController.text.trim();
       final password = _passwordController.text.trim();
 
       // Validaciones específicas
@@ -95,6 +97,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         name: _nameController.text,
         lastName: _lastNameController.text,
         document: document,
+        birthday: birthday != null
+            ? DateTime.parse(birthday)
+            : DateTime(2000, 1, 1), // Valor por defecto si no se selecciona
         ministry: _selectedMinistry!.codMinistry,
         username: username,
         password: MongoDatabase.encriptarPassword(password),
@@ -131,6 +136,59 @@ class _RegisterScreenState extends State<RegisterScreen> {
               _campo("Nombres", _nameController),
               _campo("Apellidos", _lastNameController),
               _campo("DNI", _documentController, isNumeric: true),
+              GestureDetector(
+                onTap: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: _birthdayController.text.isEmpty
+                        ? DateTime(2000, 1, 2)
+                        : DateTime.tryParse(_birthdayController.text),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime.now(),
+                    builder: (BuildContext context, Widget? child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: ColorScheme.dark(
+                            primary: Color(0xFFff8e3a),
+                            onPrimary: Colors.black,
+                            surface: Color(0xFF1E1E2C),
+                            onSurface: Colors.white,
+                          ),
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _birthdayController.text = picked.toIso8601String(); //"${picked.day}/${picked.month}/${picked.year}";
+                    });
+                  }
+                },
+                child: AbsorbPointer(
+                  child: TextFormField(
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: "Fecha de nacimiento",
+                      labelStyle: TextStyle(color: Colors.white70),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white30),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFFff8e3a)),
+                      ),
+                    ),
+                    controller: TextEditingController(
+                      text: _birthdayController == null
+                          ? ""
+                          : _birthdayController.text,
+                    ),
+                    validator: (value) =>
+                        _birthdayController == null ? "Seleccione una fecha" : null,
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
               DropdownButtonFormField2<MinistryModel>(
                 isExpanded: true,
                 value: _selectedMinistry,
@@ -170,7 +228,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   return null;
                 },
               ),
-              _campo("Usuario", _usernameController, enabled: false),
+              SizedBox(height: 16),              
+              _campo("Usuario", _usernameController, enabled: true),
               _campo("Contraseña", _passwordController, isPassword: true),
               SizedBox(height: 20),
               ElevatedButton(
