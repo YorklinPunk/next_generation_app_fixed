@@ -28,19 +28,19 @@ class _ProgrammingScreenState extends State<ProgrammingScreen> {
       final latest = await MongoDatabase.latestOfCurrentWeek();
 
       setState(() {
-        _allProgrammings = data;
-        _thisWeekProgramming = latest;
+        _allProgrammings = data.content; 
+        _thisWeekProgramming = latest.content;
         loading = false;
       });
 
-      if (latest.id != null) {
+      if (latest.content.id != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
               title: const Text("Programación de esta semana"),
               content: Text(
-                latest.roles.map((r) => "${r.nombreRol}: ${r.nombresAsignados.join(", ")}").join("\n"),
+                latest.content.roles.map((r) => "${r.nombreRol}: ${r.nombresAsignados.join(", ")}").join("\n"),
               ),
               actions: [
                 TextButton(

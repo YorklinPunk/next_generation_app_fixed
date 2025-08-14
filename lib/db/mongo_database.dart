@@ -85,17 +85,13 @@ class MongoDatabase {
     try {
       final user = await userCollection.findOne({'username': username});
       response.isValid = user != null; // Si el usuario existe, es válido
-      if (response.isValid) {
-        response.content = "El nombre de usuario ya existe.";
-      } else {
-        response.content = "El nombre de usuario está disponible.";
-      }
+      response.content = response.isValid ? "El nombre de usuario ya existe." : "El nombre de usuario está disponible.";      
+      return response;
     }
     catch (e){
       response.exceptions.add(OperationException('fetch_error', 'Error al verificar el nombre de usuario: $e'));
       return response;
     }
-    return response; // Ensure a response is always returned
   }
 
   static Future<OperationResultGeneric<String>> existeDocumento(String document) async {
@@ -105,19 +101,15 @@ class MongoDatabase {
       content: '',
     );
 
-    try {
+    try {      
       final user = await userCollection.findOne({'document': document});
-      response.isValid = user != null; // Si el usuario existe, es válido
-      if (response.isValid) {
-        response.content = "El DNI ya está registrado.";
-      } else {
-        response.content = "El DNI está disponible.";
-      }
+      response.isValid = user != null;
+      response.content = response.isValid ? "El DNI ya está registrado." : "El DNI está disponible.";
+      return response;
     } catch (e) {
       response.exceptions.add(OperationException('fetch_error', 'Error al verificar el DNI: $e'));
       return response;
     }
-    return response; // Ensure a response is always returned
   }
 
 
@@ -155,21 +147,35 @@ class MongoDatabase {
 
 
   //CRU programming
-  static Future<bool> insertProgramming(ProgrammingModel programming) async {
+  static Future<OperationResultGeneric<String>> insertProgramming(ProgrammingModel programming) async {
+    var response = OperationResultGeneric<String>(
+      isValid: false,
+      exceptions: [],
+      content: '',
+    );
+
     try {
       final result = await programmingCollection.insertOne(programming.toMap());
-      return result.isSuccess;
+      response.isValid = result.isSuccess;
+      response.content = result.isSuccess ? "Reporte insertado correctamente" : "No se registró el reporte";
+      return response;
     } catch (e) {
-      print("Error al insertar programación: $e");
-      return false;
+      response.exceptions.add(OperationException('fetch_error', 'Error al insertar programación: $e'));
+      return response;
     }
   }
 
-  static Future<bool> updateProgramming(ProgrammingModel programming) async {
+  static Future<OperationResultGeneric<String>> updateProgramming(ProgrammingModel programming) async {
+    var response = OperationResultGeneric<String>(
+      isValid: false,
+      exceptions: [],
+      content: '',
+    );
+
     try {
       if (programming.id == null) {
-        print("No se puede actualizar: id nulo");
-        return false;
+        response.exceptions.add(OperationException('fetch_error', 'No se puede actualizar: id nulo'));
+        return response;
       }
 
       final result = await programmingCollection.updateOne(
@@ -182,23 +188,53 @@ class MongoDatabase {
           ..set('nomUsuarioEdicion', programming.nomUsuarioEdicion),
       );
 
-      return result.isSuccess;
+      result.isValid = result.isSuccess;
+      result.content = "Programación actualizada correctemente";
+
+      return response;
     } catch (e) {
-      print("Error al actualizar programación: $e");
-      return false;
+      response.exceptions.add(OperationException('fetch_error', 'Error al actualizar programación: $e'));
+      return response;
     }
   }
 
-  static Future<List<ListProgrammingModel>> getAllProgrammings() async {
-    final result = await MongoDatabase.programmingCollection.find().toList();
-    if(result.isEmpty) {
-      print("No hay programaciones registradas.");
-      return [];
+  static Future<OperationResultGeneric<List<ListProgrammingModel>>> getAllProgrammings() async {
+    var response = OperationResultGeneric<List<ListProgrammingModel>>(
+      isValid: false,
+      exceptions: [],
+      content: [],
+    );
+    try{
+      final result = await MongoDatabase.programmingCollection.find().toList();
+      if(result.isEmpty) {
+        response.content = [];
+        return response;
+      }
+
+      response.content = result.map((e) => ListProgrammingModel.fromMap(e)).toList();      
+      response.isValid = true;
+      return response;
+    } catch (e) {
+      response.exceptions.add(OperationException('fetch_error', 'Error al listar programación: $e'));
+      return response;
     }
-    return result.map((e) => ListProgrammingModel.fromMap(e)).toList();
   }
 
-  static Future<ProgrammingModel> latestOfCurrentWeek() async {
+  static Future<OperationResultGeneric<ProgrammingModel>> latestOfCurrentWeek() async {
+    var response = OperationResultGeneric<ProgrammingModel>(
+      isValid: false,
+      exceptions: [],
+      content: ProgrammingModel(
+          id: null,
+          nomUsuarioCreacion: '',
+          fechaHoraCreacion: DateTime.now(),
+          roles: [],
+          fechaHoraPogramacion: DateTime.now(),
+          fechaHoraEdicion: DateTime.now(),
+          nomUsuarioEdicion: '',
+        ),
+    );
+
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
     final endOfWeek = startOfWeek.add(const Duration(days: 6));
@@ -212,22 +248,16 @@ class MongoDatabase {
       }).sort({'fechaHoraPogramacion': -1}).toList();
 
       if (result.isNotEmpty) {
-        return ProgrammingModel.fromMap(result.first);
+        response.content = ProgrammingModel.fromMap(result.first);
       }
-    } catch (e) {
-      print("Error al buscar programación de la semana actual: $e");
-    }
 
-    // Retornar modelo vacío si no se encontró nada o hubo error
-    return ProgrammingModel(
-      id: null,
-      nomUsuarioCreacion: '',
-      fechaHoraCreacion: DateTime.now(),
-      roles: [],
-      fechaHoraPogramacion: DateTime.now(),
-      fechaHoraEdicion: DateTime.now(),
-      nomUsuarioEdicion: '',
-    );
+      response.isValid = true;
+      return response;
+      
+    } catch (e) {
+      response.exceptions.add(OperationException('fetch_error', 'Error al buscar programación de la semana actual: $e'));
+      return  response;
+    }
   }
 
 

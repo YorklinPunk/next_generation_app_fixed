@@ -20,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _birthdayController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _showBirthdayPicker = TextEditingController();
   bool _verPassword = false;
   List<MinistryModel> _ministries = [];
   MinistryModel? _selectedMinistry = MinistryModel(
@@ -161,6 +162,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   );
                   if (picked != null) {
                     setState(() {
+                      _showBirthdayPicker.text = "${picked.day}/${picked.month}/${picked.year}";
                       _birthdayController.text = picked.toIso8601String(); //"${picked.day}/${picked.month}/${picked.year}";
                     });
                   }
@@ -181,7 +183,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: TextEditingController(
                       text: _birthdayController == null
                           ? ""
-                          : _birthdayController.text,
+                          : _showBirthdayPicker.text,
                     ),
                     validator: (value) =>
                         _birthdayController == null ? "Seleccione una fecha" : null,
