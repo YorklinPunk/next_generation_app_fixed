@@ -32,7 +32,7 @@ class PrincipalScreen extends StatelessWidget {
                     ),
                   ),
                   const CircleAvatar(
-                    backgroundImage: AssetImage("assets/avatar.png"), // Usa tu imagen real
+                    backgroundImage: AssetImage("assets/images/avatar.png"), // Usa tu imagen real
                     radius: 25,
                   ),
                 ],

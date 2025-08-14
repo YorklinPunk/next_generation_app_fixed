@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:next_generation_app_fixed/db/mongo_database.dart'; // Asegúrate de tener esta clase
 import 'package:next_generation_app_fixed/models/list_programming_model.dart';
-import 'package:next_generation_app_fixed/models/programming_model.dart';
+// import 'package:next_generation_app_fixed/models/programming_model.dart';
 import 'package:next_generation_app_fixed/utils/dialog_helper.dart'; // tu función de dialog
 
 class ProgrammingScreen extends StatefulWidget {
@@ -13,7 +13,7 @@ class ProgrammingScreen extends StatefulWidget {
 
 class _ProgrammingScreenState extends State<ProgrammingScreen> {
   List<ListProgrammingModel> _allProgrammings = [];
-  ProgrammingModel? _thisWeekProgramming;
+  // ProgrammingModel? _thisWeekProgramming;
   bool loading = true;
 
   @override
@@ -29,7 +29,7 @@ class _ProgrammingScreenState extends State<ProgrammingScreen> {
 
       setState(() {
         _allProgrammings = data.content; 
-        _thisWeekProgramming = latest.content;
+        // _thisWeekProgramming = latest.content;
         loading = false;
       });
 

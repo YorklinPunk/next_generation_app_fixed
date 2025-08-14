@@ -53,7 +53,7 @@ class UserModel {
       password: map['password'],
       role: map['role'],
       state: map['state'] ?? 1, // Por defecto activo
-      dateRegistration: DateTime.parse(map['dateRegistration']),
+      dateRegistration: map['dateRegistration'],
     );
   }
 }
