@@ -107,6 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         role: 3,
         state: 1,
         dateRegistration: DateTime.now(),
+        urlUser: "",
       );
 
       await MongoDatabase.userCollection.insertOne(user.toMap());

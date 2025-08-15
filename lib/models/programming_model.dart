@@ -34,7 +34,7 @@ class ProgrammingModel {
   }
 
   Map<String, dynamic> toMap() {
-    return {      
+    return {
       if (id != null) '_id': id,
       'nomUsuarioCreacion': nomUsuarioCreacion,
       'fechaHoraCreacion': fechaHoraCreacion.toIso8601String(),

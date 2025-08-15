@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:next_generation_app_fixed/models/user_model.dart';
+import 'package:next_generation_app_fixed/screens/editUser_screen.dart';
 import 'package:next_generation_app_fixed/screens/principal_menu/report_screen.dart';
 import 'package:next_generation_app_fixed/screens/principal_menu/weare_screen.dart';
 import 'package:next_generation_app_fixed/screens/principal_menu/programming_screen.dart';
@@ -31,9 +32,25 @@ class PrincipalScreen extends StatelessWidget {
                       color: Colors.black87,
                     ),
                   ),
-                  const CircleAvatar(
-                    backgroundImage: AssetImage("assets/images/avatar.png"), // Usa tu imagen real
-                    radius: 25,
+                  // const CircleAvatar(
+                  //   backgroundImage: AssetImage("assets/images/avatar.png"), // Usa tu imagen real
+                  //   radius: 25,
+                  // ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EditUserScreen(user: user), // Envía el usuario actual
+                        ),
+                      );
+                    },
+                    child: CircleAvatar(
+                      backgroundImage: user.urlUser != null && user.urlUser!.isNotEmpty
+                          ? NetworkImage(user.urlUser!) as ImageProvider
+                          : const AssetImage("assets/images/avatar.png"),
+                      radius: 25,
+                    ),
                   ),
                 ],
               ),
