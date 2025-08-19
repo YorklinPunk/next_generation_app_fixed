@@ -24,23 +24,31 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
     setState(() => _imageFile = File(picked.path));
 
     final bytes = await _imageFile!.readAsBytes();
-    final base64Image = base64Encode(bytes);
+    final base64Image = base64Encode(bytes);    
+    const String url = "https://api.imgbb.com/1/upload";
 
-    final response = await http.post(
-      Uri.parse('https://api.imgbb.com/1/upload'),
-      body: {
-        'key': imgbbApiKey,
-        'image': base64Image,
-        'name': picked.name,
-      },
-    );
+    try {
+      // Parámetros
+      final Map<String, String> body = {
+        "key": imgbbApiKey,
+        "image": base64Image,
+        "name": "abcimagen" // nombre personalizado
+      };
 
-    if (response.statusCode == 200) {
-      final data = (const JsonDecoder().convert(response.body) as Map)['data'];
-      setState(() {
-        _uploadedUrl = data['url'];
-        _imageId = data['id'];
-      });
+      // Petición POST
+      final response = await http.post(Uri.parse(url), body: body);
+      if (response.statusCode == 200) {
+        final data = (const JsonDecoder().convert(response.body) as Map)['data'];
+        setState(() {
+          _uploadedUrl = data['url'];
+          _imageId = data['id'];
+        });
+      }else {
+        print("❌ Error al subir imagen: ${response.statusCode}");
+        print(response.body);
+      }
+    } catch (e) {
+      print("⚠️ Error: $e");
     }
   }
 
