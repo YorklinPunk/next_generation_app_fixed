@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:next_generation_app_fixed/db/image_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:next_generation_app_fixed/models/user_model.dart';
 import 'package:next_generation_app_fixed/models/ministry_model.dart';
@@ -33,7 +34,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
     _nameController = TextEditingController(text: widget.user.name);
     _lastNameController = TextEditingController(text: widget.user.lastName);
     _documentController = TextEditingController(text: widget.user.document);
-    _passwordController = TextEditingController(text: widget.user.password);
+    _passwordController = TextEditingController(text: "password");
     _birthdayController = TextEditingController(
       text: widget.user.birthday.toLocal().toString().split(" ")[0],
     );
@@ -68,18 +69,36 @@ class _EditUserScreenState extends State<EditUserScreen> {
     }
   }
 
-  Future<void> _uploadImage() async {
-    if (_selectedImage == null) return;
+  Future<void> _uploadImage(String dni) async {
 
-    // Aquí llamas a tu endpoint para subir la imagen
-    // y guardas la URL que retorne
-    final url = "";//await MongoDatabase.uploadUserImage(_selectedImage!);
-    setState(() {
-      _uploadedImageUrl = url;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Foto guardada correctamente")),
-    );
+    if (_selectedImage != null) {      
+      if (_selectedImage!.lengthSync() > 5 * 1024 * 1024) { // 5 MB
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("La imagen no puede superar los 5 MB")),
+        );
+        return;
+      }
+      
+      final result = await ImageManagerApi.pickAndUploadImage(dni, _selectedImage!); // Ensure _selectedImage is non-null
+      
+      if (!result.isValid) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.exceptions.first.description)),
+        );
+        return;
+      }
+      setState(() {
+        _uploadedImageUrl = result.content;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Foto guardada correctamente")),
+      );
+    }else{
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No se ha seleccionado ninguna imagen")),
+      );
+    }
   }
 
   Future<void> _saveChanges() async {
@@ -148,7 +167,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
           ),
           const SizedBox(height: 10),
           ElevatedButton(
-            onPressed: _uploadImage,
+            onPressed: () => _uploadImage(widget.user.document),
             child: const Text("Guardar foto"),
           ),
           const SizedBox(height: 20),
