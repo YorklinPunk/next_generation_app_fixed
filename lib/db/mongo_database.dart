@@ -58,6 +58,30 @@ class MongoDatabase {
   //   }
   // }
 
+  static Future<OperationResultGeneric<String>> editUser(UserModel user) async {
+    var response = OperationResultGeneric<String>(
+      isValid: false,
+      exceptions: [],
+      content: '',
+    );
+
+    try {
+      if (user.id == null) {
+        response.exceptions.add(OperationException('update_error', 'No se puede actualizar: id nulo'));
+        return response;
+      }
+      final existingUser = await userCollection.findOne({'_id': user.id});
+      response.isValid = existingUser != null; // Si el usuario existe, es válido
+      
+      response.content = response.isValid ? "El nombre de usuario ya existe." : "El nombre de usuario está disponible.";      
+      return response;
+    }
+    catch (e){
+      response.exceptions.add(OperationException('fetch_error', 'Error al verificar el nombre de usuario: $e'));
+      return response;
+    }
+  }
+
   static Future<OperationResultGeneric<List<UserModel>>> getUsers() async {
     var response = OperationResultGeneric<List<UserModel>>(
       isValid: false,
