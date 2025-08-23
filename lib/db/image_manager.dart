@@ -5,12 +5,15 @@ import 'package:http/http.dart' as http;
 import '../models/generic_model/operation_result_model.dart';
 
 class ImageManagerApi {
-  static var imgbbApiKey = '88a83654cc050c57ebc10abc8628d69f';
+  static var imgbbApiKey = 'gEBXYibvtsevfHAQ6GvZd0eer3OZgjDC';
   static var _uploadedUrl;
   static var _imageId;
   // static Map<String, dynamic>? _imageInfo;
 
-  static Future<OperationResultGeneric<String>> pickAndUploadImage(String nombre, File _imageFile) async {
+  static Future<OperationResultGeneric<String>> pickAndUploadImage(
+    String nombre,
+    File imageFile
+  ) async {
     var response = OperationResultGeneric<String>(
       isValid: false,
       exceptions: [],
@@ -18,45 +21,52 @@ class ImageManagerApi {
     );
 
     try {
-      final bytes = await _imageFile.readAsBytes();
-      final base64Image = base64Encode(bytes);    
-      const String url = "https://api.imgbb.com/1/upload";
+      var request = http.MultipartRequest(
+        "POST",
+        Uri.parse("https://upload-sa-sao.gofile.io/uploadFile"),
+      );
 
-      final Map<String, String> body = {
-        "key": imgbbApiKey,
-        "image": base64Image,
-        "name": nombre // nombre personalizado
-      };
+      // Header con token
+      request.headers['Authorization'] = 'Bearer gEBXYibvtsevfHAQ6GvZd0eer3OZgjDC';
 
-      // Petición POST
-      final result = await http.post(Uri.parse(url), body: body);
+      // Adjuntar archivo
+      request.files.add(
+        await http.MultipartFile.fromPath('file', imageFile.path),
+      );
+
+      // Enviar petición
+      var streamedResponse = await request.send();
+      var result = await http.Response.fromStream(streamedResponse);
+
+      print("📡 Status: ${result.statusCode}");
+      print("📡 Body: ${result.body}");
+
       if (result.statusCode == 200) {
-        final data = (const JsonDecoder().convert(result.body) as Map)['data'];
-          _uploadedUrl = data as Map<String, dynamic>;
-          response.content = _uploadedUrl['url'] as String;
+        final responseData = const JsonDecoder().convert(result.body) as Map<String, dynamic>;
+
+        if (responseData['status'] == 'ok') {
+          final directLink = responseData['data']['directLink'] as String;
+          response.content = directLink;
           response.isValid = true;
-          _imageId = data['id'];
-      }else {
-        print("❌ Error al subir imagen: ${result.statusCode}");
-        print(result.body);
-        response.exceptions.add(OperationException('${result.statusCode}', 'Error al subir imagen'));
+        } else {
+          response.exceptions.add(
+            OperationException('upload_error', 'Respuesta con error: ${result.body}'),
+          );
+        }
+      } else {
+        response.exceptions.add(
+          OperationException('${result.statusCode}', 'Error en servidor: ${result.body}'),
+        );
       }
     } catch (e) {
-      response.exceptions.add(OperationException('fetch_error', 'Error al subir la imagen: $e'));
+      response.exceptions.add(
+        OperationException('fetch_error', 'Error al subir la imagen: $e'),
+      );
     }
+
     return response;
   }
 
-  // Future<void> _fetchImageDetails() async {
-  //   if (_imageId == null) return;
 
-  //   final response = await http.get(
-  //     Uri.parse('https://api.imgbb.com/1/image/$_imageId?key=$imgbbApiKey'),
-  //   );
 
-  //   if (response.statusCode == 200) {
-  //     final data = (const JsonDecoder().convert(response.body) as Map)['data'];
-  //     setState(() => _imageInfo = data as Map<String, dynamic>);
-  //   }
-  // }  
 }

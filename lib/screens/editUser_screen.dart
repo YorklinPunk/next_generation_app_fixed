@@ -79,7 +79,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
         return;
       }
       
-      final result = await ImageManagerApi.pickAndUploadImage(dni, _selectedImage!); // Ensure _selectedImage is non-null
+      final result = await ImageManagerApi.pickAndUploadImage(dni, _selectedImage!);
       
       if (!result.isValid) {
         ScaffoldMessenger.of(context).showSnackBar(
