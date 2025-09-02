@@ -23,12 +23,18 @@ class ProgrammingModel {
     return ProgrammingModel(
       id: map['_id'] as ObjectId?,
       nomUsuarioCreacion: map['nomUsuarioCreacion'] as String,
-      fechaHoraCreacion: DateTime.parse(map['fechaHoraCreacion'] as String),
+      fechaHoraCreacion: (map['fechaHoraCreacion'] is DateTime
+          ? (map['fechaHoraCreacion'] as DateTime).toLocal()
+          : DateTime.parse(map['fechaHoraCreacion']).toLocal()),
       roles: (map['roles'] as List<dynamic>)
           .map((e) => RolAsignado.fromMap(e as Map<String, dynamic>))
           .toList(),
-      fechaHoraPogramacion: DateTime.parse(map['fechaHoraPogramacion'] as String),
-      fechaHoraEdicion: DateTime.parse(map['fechaHoraEdicion'] as String),
+      fechaHoraPogramacion:(map['fechaHoraPogramacion'] is DateTime
+          ? (map['fechaHoraPogramacion'] as DateTime).toLocal()
+          : DateTime.parse(map['fechaHoraPogramacion']).toLocal()),
+      fechaHoraEdicion: (map['fechaHoraEdicion'] is DateTime
+          ? (map['fechaHoraEdicion'] as DateTime).toLocal()
+          : DateTime.parse(map['fechaHoraEdicion']).toLocal()),
       nomUsuarioEdicion: map['nomUsuarioEdicion'] as String,
     );
   }

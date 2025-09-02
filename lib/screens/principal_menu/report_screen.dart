@@ -6,7 +6,8 @@ import 'package:next_generation_app_fixed/models/report_model.dart'; // Asegúra
 
 class ReportScreen extends StatefulWidget {
   final UserModel user;
-  const ReportScreen({super.key, required this.user});
+  final ReportModel initialReport;
+  const ReportScreen({super.key, required this.user, required this.initialReport});
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();
@@ -24,13 +25,14 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   void initState() {
     super.initState();
-    _initData();
+    _latestReport = widget.initialReport;
+    _cargarMinistries();
   }
 
-  Future<void> _initData() async {
-    await _cargarMinistries();
-    await _getLatestReport();
-  }
+  // Future<void> _initData() async {
+  //   await _cargarMinistries();
+  //   await _getLatestReport();
+  // }
 
   Future<void> _cargarMinistries() async {
     final data = await MongoDatabase.getMinistries();
@@ -39,37 +41,37 @@ class _ReportScreenState extends State<ReportScreen> {
     });
   }
 
-  Future<void> _getLatestReport() async {
-    final reportResult = await MongoDatabase.getLatestReport();
-    ReportModel? latestReport = reportResult.content;
+  // Future<void> _getLatestReport() async {
+  //   final reportResult = await MongoDatabase.getLatestReport();
+  //   ReportModel? latestReport = reportResult.content;
 
-    if (latestReport != null && latestReport.ministries.isNotEmpty) {
-      setState(() {
-        _latestReport = latestReport;
-      });
-      print("último reporte encontrado: ${latestReport.fecha}");
-    } else {
-      // Crear uno vacío basado en _ministries ya cargado
-      List<MinistryDetail> ministryDetails = _ministries.map((ministry) {
-        return MinistryDetail(
-          codMinistry: ministry.codMinistry,
-          nomMinistry: ministry.nomMinistry,
-          cantidad: 0,
-          nomUsuarioEdit: widget.user.ministry == ministry.codMinistry ? widget.user.username : "",
-          fechaHoraEdit: DateTime.now(),
-        );
-      }).toList();
+  //   if (latestReport != null && latestReport.ministries.isNotEmpty) {
+  //     setState(() {
+  //       _latestReport = latestReport;
+  //     });
+  //     print("último reporte encontrado: ${latestReport.fecha}");
+  //   } else {
+  //     // Crear uno vacío basado en _ministries ya cargado
+  //     List<MinistryDetail> ministryDetails = _ministries.map((ministry) {
+  //       return MinistryDetail(
+  //         codMinistry: ministry.codMinistry,
+  //         nomMinistry: ministry.nomMinistry,
+  //         cantidad: 0,
+  //         nomUsuarioEdit: widget.user.ministry == ministry.codMinistry ? widget.user.username : "",
+  //         fechaHoraEdit: DateTime.now(),
+  //       );
+  //     }).toList();
 
-      setState(() {
-        _latestReport = ReportModel(
-          fecha: DateTime.now(),
-          ministries: ministryDetails,
-        );
-      });
+  //     setState(() {
+  //       _latestReport = ReportModel(
+  //         fecha: DateTime.now(), //Fecha del servicio
+  //         ministries: ministryDetails,
+  //       );
+  //     });
 
-      print("No se encontró ningún reporte. Se generó uno nuevo.");
-    }
-  }
+  //     print("No se encontró ningún reporte. Se generó uno nuevo.");
+  //   }
+  // }
 
 
   void _startEditing(int index) {

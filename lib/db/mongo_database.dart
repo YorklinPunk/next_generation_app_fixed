@@ -1,4 +1,5 @@
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:next_generation_app_fixed/models/all_report_model.dart';
 import 'package:next_generation_app_fixed/models/list_programming_model.dart';
 import 'package:next_generation_app_fixed/models/report_model.dart';
 import '../models/programming_model.dart';
@@ -305,8 +306,8 @@ class MongoDatabase {
     }
   }
 
-  static Future<OperationResultGeneric<List<ReportModel>>> getAllReports() async {
-    var response = OperationResultGeneric<List<ReportModel>>(
+  static Future<OperationResultGeneric<List<AllReportModel>>> getAllReports() async {
+    var response = OperationResultGeneric<List<AllReportModel>>(
       isValid: false,
       exceptions: [],
       content: [],
@@ -314,11 +315,30 @@ class MongoDatabase {
 
     try {
       final results = await ReportCollection.find().toList();
+      print("Resultados en Mongo: $results");
       response.isValid = true; // Si llegamos aquí, la consulta fue exitosa
-      response.content = results.map((doc) => ReportModel.fromMap(doc)).toList();
+      response.content = results.map((doc) => AllReportModel.fromMap(doc)).toList();
       return response;
     } catch (e) {
       response.exceptions.add(OperationException('fetch_error', 'Error al obtener reportes: $e'));
+      return response;
+    }
+  }
+
+  static Future<OperationResultGeneric<ReportModel?>> getReport(ObjectId id) async {
+    var response = OperationResultGeneric<ReportModel?>(
+      isValid: false,
+      exceptions: [],
+      content: null,
+    );
+
+    try {
+      final result = await ReportCollection.findOne(where.id(id));
+      response.isValid = true;
+      response.content = result != null ? ReportModel.fromMap(result) : null;
+      return response;
+    } catch (e) {
+      response.exceptions.add(OperationException('fetch_error', 'Error al obtener el reporte: $e'));
       return response;
     }
   }

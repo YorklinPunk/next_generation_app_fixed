@@ -13,9 +13,9 @@ class ReportModel {
   factory ReportModel.fromMap(Map<String, dynamic> map) {
     return ReportModel(
       id: map['_id'],
-      fecha: map['fecha'] is DateTime
-          ? map['fecha']
-          : DateTime.parse(map['fecha'].toString()),
+      fecha: (map['fecha'] is DateTime 
+            ? (map['fecha'] as DateTime).toLocal() 
+            : DateTime.parse(map['fecha']).toLocal()),
       ministries: (map['ministries'] as List<dynamic>)
           .map((e) => MinistryDetail.fromMap(e as Map<String, dynamic>))
           .toList(),
@@ -51,9 +51,9 @@ class MinistryDetail {
       nomMinistry: map['nomMinistry'] ?? '',
       cantidad: map['cantidad'] ?? 0,
       nomUsuarioEdit: map['nomUsuarioEdit'] ?? '',
-      fechaHoraEdit: map['fechaHoraEdit'] is DateTime
-          ? map['fechaHoraEdit']
-          : DateTime.parse(map['fechaHoraEdit'].toString()),
+      fechaHoraEdit: (map['fechaHoraEdit'] is DateTime
+            ? (map['fechaHoraEdit'] as DateTime).toLocal()
+            : DateTime.parse(map['fechaHoraEdit']).toLocal()),
     );
   }
 

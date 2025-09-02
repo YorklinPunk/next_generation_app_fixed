@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:next_generation_app_fixed/models/user_model.dart';
 import 'package:next_generation_app_fixed/screens/editUser_screen.dart';
-import 'package:next_generation_app_fixed/screens/principal_menu/report_screen.dart';
+import 'package:next_generation_app_fixed/screens/principal_menu/report_list_screen.dart';
 import 'package:next_generation_app_fixed/screens/principal_menu/weare_screen.dart';
 import 'package:next_generation_app_fixed/screens/principal_menu/programming_screen.dart';
 
@@ -128,7 +128,7 @@ class PrincipalScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ReportScreen(user: user)
+                            builder: (context) => ReportListScreen(user: user)
                           ),
                         );
                       },
