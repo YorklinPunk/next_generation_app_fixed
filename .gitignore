@@ -41,3 +41,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Desktop platform files
+linux/flutter/generated_plugin_registrant.*
+linux/flutter/generated_plugins.cmake
+macos/Flutter/GeneratedPluginRegistrant.swift
+windows/flutter/generated_plugin_registrant.*
+windows/flutter/generated_plugins.cmake
+
+# Additional build outputs if needed
+build/
