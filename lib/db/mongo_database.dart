@@ -317,7 +317,9 @@ class MongoDatabase {
       final results = await ReportCollection.find().toList();
       print("Resultados en Mongo: $results");
       response.isValid = true; // Si llegamos aquí, la consulta fue exitosa
-      response.content = results.map((doc) => AllReportModel.fromMap(doc)).toList();
+      //response.content = response.content = results.map<AllReportModel>((doc) => AllReportModel.fromMap(doc)).toList();
+      response.content = results.map<AllReportModel>((doc) => AllReportModel.fromMap(doc)).toList();
+
       return response;
     } catch (e) {
       response.exceptions.add(OperationException('fetch_error', 'Error al obtener reportes: $e'));

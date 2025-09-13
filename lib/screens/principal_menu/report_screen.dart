@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:next_generation_app_fixed/models/user_model.dart';
 import 'package:next_generation_app_fixed/db/mongo_database.dart';
 import 'package:next_generation_app_fixed/models/ministry_model.dart';
@@ -6,8 +7,9 @@ import 'package:next_generation_app_fixed/models/report_model.dart'; // Asegúra
 
 class ReportScreen extends StatefulWidget {
   final UserModel user;
-  final ReportModel initialReport;
-  const ReportScreen({super.key, required this.user, required this.initialReport});
+  final mongo.ObjectId? lastReportid;
+  
+  const ReportScreen({super.key, required this.user, required this.lastReportid});
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();
@@ -19,13 +21,22 @@ class _ReportScreenState extends State<ReportScreen> {
     fecha: DateTime.now(),
     ministries: [],
   );
+
   final Map<int, TextEditingController> _controllers = {};
   final Map<int, bool> _isEditing = {};
 
   @override
   void initState() {
     super.initState();
-    _latestReport = widget.initialReport;
+
+    if(widget.lastReportid == null){
+      _latestReport = ReportModel(
+        fecha: DateTime.now(), //Fecha del servicio
+        ministries: [],
+      );
+    }
+    // _latestReport = widget.initialReport;
+    // _lastReportid = widget.lastReportid;
     _cargarMinistries();
   }
 

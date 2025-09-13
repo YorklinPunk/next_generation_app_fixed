@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:next_generation_app_fixed/db/mongo_database.dart';
-import 'package:next_generation_app_fixed/models/report_model.dart';
+import 'package:next_generation_app_fixed/models/all_report_model.dart';
 import 'package:next_generation_app_fixed/models/user_model.dart';
 import 'report_screen.dart';
 
@@ -13,8 +13,10 @@ class ReportListScreen extends StatefulWidget {
 }
 
 class _ReportListScreenState extends State<ReportListScreen> {
-  List<ReportModel> _reports = [];
+  List<AllReportModel> _reports = [];
   bool _loading = true;
+  
+  get id => null;
 
   @override
   void initState() {
@@ -27,7 +29,7 @@ class _ReportListScreenState extends State<ReportListScreen> {
       final result = await MongoDatabase.getAllReports();
       setState(() {
         _reports = (result.content != null)
-            ? result.content!.map<ReportModel>((e) => e as ReportModel).toList()
+            ? result.content!.map<AllReportModel>((e) => e as AllReportModel).toList()
             : [];
         _loading = false;
       });
@@ -40,12 +42,10 @@ class _ReportListScreenState extends State<ReportListScreen> {
   }
 
   void _createNewReport() async {
-    // Crea un reporte vacío y abre ReportScreen
-    final newReport = ReportModel(fecha: DateTime.now(), ministries: []);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ReportScreen(user: widget.user, initialReport: newReport),
+        builder: (_) => ReportScreen(user: widget.user, lastReportid: id ?? null),
       ),
     );
   }
@@ -75,7 +75,7 @@ class _ReportListScreenState extends State<ReportListScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ReportScreen(user: widget.user, initialReport: r),
+                                builder: (_) => ReportScreen(user: widget.user, lastReportid: r.id),
                               ),
                             );
                           },
@@ -85,6 +85,27 @@ class _ReportListScreenState extends State<ReportListScreen> {
                     );
                   },
                 ),
+        bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Estadísticas"),
+          BottomNavigationBarItem(icon: Icon(Icons.check_circle), label: "Asistencia"),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: "Calendario"),
+        ],
+        onTap: (index) {
+          // Aquí puedes manejar navegación
+          switch (index) {
+            case 0:
+              // Navega a estadísticas
+              break;
+            case 1:
+              // Navega a asistencia
+              break;
+            case 2:
+              // Navega a calendario
+              break;
+          }
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _createNewReport,
         backgroundColor: Colors.orange,
