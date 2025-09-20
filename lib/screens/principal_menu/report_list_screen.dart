@@ -42,18 +42,33 @@ class _ReportListScreenState extends State<ReportListScreen> {
   }
 
   void _createNewReport() async {
-    Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ReportScreen(user: widget.user, lastReportid: id ?? null),
       ),
     );
+    _loadReports(); 
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Reportes de Ministerios")),
+      backgroundColor: const Color(0xFFFFD3C3),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFFD3C3),
+        elevation: 0,
+        centerTitle: true, // 👈 Centra el título
+        title: const Text(
+          "Reportes",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _reports.isEmpty
@@ -85,7 +100,10 @@ class _ReportListScreenState extends State<ReportListScreen> {
                     );
                   },
                 ),
-        bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(          
+        backgroundColor: const Color(0xFF1E1E2C),
+        selectedItemColor: Color(0xFFff8e3a),
+        unselectedItemColor: Colors.white54,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Estadísticas"),
           BottomNavigationBarItem(icon: Icon(Icons.check_circle), label: "Asistencia"),
@@ -107,9 +125,10 @@ class _ReportListScreenState extends State<ReportListScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFFff8e3a),
         onPressed: _createNewReport,
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
+        //backgroundColor: Colors.orange,
+        child: const Icon(Icons.add, color: Colors.black),
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:mongo_dart/mongo_dart.dart';
 class ReportModel {
   final ObjectId? id;
   final DateTime fecha;
-  final List<MinistryDetail> ministries;
+  List<MinistryDetail> ministries;
 
   ReportModel({
     this.id,

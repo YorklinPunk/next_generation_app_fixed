@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:next_generation_app_fixed/models/user_model.dart';
 import 'package:next_generation_app_fixed/db/mongo_database.dart';
@@ -16,6 +17,7 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportScreen> {
+  String _tituloView = "";
   List<MinistryModel> _ministries = [];
   ReportModel _latestReport = ReportModel(
     fecha: DateTime.now(),
@@ -28,16 +30,19 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   void initState() {
     super.initState();
+    _initData(); // no lleva await aquí
+  }
 
-    if(widget.lastReportid == null){
-      _latestReport = ReportModel(
-        fecha: DateTime.now(), //Fecha del servicio
-        ministries: [],
-      );
+  Future<void> _initData() async {
+    final dateFormat = DateFormat('dd/MM/yyyy');
+
+    if (widget.lastReportid == null) {
+      await _cargarMinistries();
+      _tituloView = "Nuevo Reporte ${dateFormat.format(DateTime.now().toLocal())}";
+    } else {
+      await _getLatestReport(widget.lastReportid!);
+      _tituloView = "Reporte ${dateFormat.format(_latestReport.fecha.toLocal())}";
     }
-    // _latestReport = widget.initialReport;
-    // _lastReportid = widget.lastReportid;
-    _cargarMinistries();
   }
 
   // Future<void> _initData() async {
@@ -47,13 +52,22 @@ class _ReportScreenState extends State<ReportScreen> {
 
   Future<void> _cargarMinistries() async {
     final data = await MongoDatabase.getMinistries();
+    
     setState(() {
-      _ministries = data.content;
+      _latestReport.ministries = data.content.map((ministry) {
+        return MinistryDetail(
+          codMinistry: ministry.codMinistry,
+          nomMinistry: ministry.nomMinistry,
+          cantidad: 0,
+          nomUsuarioEdit: widget.user.username,
+          fechaHoraEdit: DateTime.now(),
+        );
+      }).toList();
     });
   }
 
-  // Future<void> _getLatestReport() async {
-  //   final reportResult = await MongoDatabase.getLatestReport();
+  // Future<void> _getLatestReport(mongo.ObjectId _id) async {
+  //   final reportResult = await MongoDatabase.getReport(_id);
   //   ReportModel? latestReport = reportResult.content;
 
   //   if (latestReport != null && latestReport.ministries.isNotEmpty) {
@@ -84,11 +98,21 @@ class _ReportScreenState extends State<ReportScreen> {
   //   }
   // }
 
+  Future<void> _getLatestReport(mongo.ObjectId id) async {
+    final reportResult = await MongoDatabase.getReport(id);
+    setState(() {
+      _latestReport = reportResult.content!;
+    });
+  }
 
   void _startEditing(int index) {
     setState(() {
       _isEditing[index] = true;
-      _controllers[index] = TextEditingController(text: "0");
+
+      final currentCantidad = _latestReport.ministries[index].cantidad;
+      _controllers[index] = TextEditingController(
+        text: currentCantidad.toString(),
+      );
     });
   }
 
@@ -97,16 +121,10 @@ class _ReportScreenState extends State<ReportScreen> {
     final controller = _controllers[index];
     final newCantidad = int.tryParse(controller?.text ?? "");
     
-    final i = _latestReport.ministries.indexWhere(
-      (m) => m.codMinistry == _ministries[index].codMinistry,
-    );
+    final currentMinistry = _latestReport.ministries[index];
 
-    if (i == -1) return;
-
-    final currentMinistry = _latestReport.ministries[i];
-
-    // Si no hay cambios en la cantidad, salir sin guardar
-    if (newCantidad == currentMinistry.cantidad) {
+    // si no cambió el valor, no hacer nada
+    if (newCantidad == null || newCantidad == currentMinistry.cantidad) {
       setState(() {
         _isEditing[index] = false;
         _controllers[index]?.dispose();
@@ -115,27 +133,33 @@ class _ReportScreenState extends State<ReportScreen> {
       return;
     }
 
-    currentMinistry.cantidad = newCantidad ?? 0;
+    // actualizar
+    currentMinistry.cantidad = newCantidad;
     currentMinistry.nomUsuarioEdit = widget.user.username;
     currentMinistry.fechaHoraEdit = DateTime.now();
-     try {
+
+    try {
       if (_latestReport.id != null) {
-        print("Editando reporte existente");
         await MongoDatabase.editReport(_latestReport);
       } else {
-        print("Insertando nuevo reporte");
-        await MongoDatabase.insertReport(_latestReport);
+        await MongoDatabase.insertReport(_latestReport);  
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Reporte guardado correctamente')),
-      );
+        // ✅ Mostrar mensaje de éxito
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✅ Actualizado correctamente")),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al guardar el reporte')),
-      );
+      // ⚠️ Mostrar mensaje de error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("❌ Error al guardar el reporte: $e")),
+        );
+      }
     }
 
+    
     setState(() {
       _isEditing[index] = false;
       _controllers[index]?.dispose();
@@ -154,7 +178,8 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Reporte de Ministerios")),
+      
+      appBar: AppBar(title: Text(_tituloView)),
       body: _latestReport.ministries.isEmpty
           ? const Center(child: Text("No hay ministerios disponibles"))
           : ListView.builder(
