@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/user_provider.dart';
 import 'package:next_generation_app_fixed/screens/principal_screen.dart';
 import 'package:next_generation_app_fixed/screens/register_screen.dart';
 import 'package:next_generation_app_fixed/services/auth_service.dart';
 import 'package:next_generation_app_fixed/utils/dialog_helper.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscurePassword = true;
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -147,11 +149,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         final user = await AuthService.login(username, password);
 
                         if (user != null) {
+
+                          ref.read(userProvider.notifier).state = user; // ✅ guardar user en global
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => PrincipalScreen(user: user),
-                            ),
+                            MaterialPageRoute(builder: (_) => const PrincipalScreen()),
                           );
                         } else {
                           showCustomDialog(context, "Usuario y/o contraseña incorrecta", 3);

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:next_generation_app_fixed/models/user_model.dart';
 import 'package:next_generation_app_fixed/screens/editUser_screen.dart';
 import 'package:next_generation_app_fixed/screens/principal_menu/report_list_screen.dart';
 import 'package:next_generation_app_fixed/screens/principal_menu/weare_screen.dart';
 import 'package:next_generation_app_fixed/screens/principal_menu/programming_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/user_provider.dart';
 
-
-class PrincipalScreen extends StatelessWidget {
-  final UserModel user;
-  const PrincipalScreen({super.key, required this.user});
+class PrincipalScreen extends ConsumerWidget {
+  const PrincipalScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userProvider);
     return Scaffold(
       backgroundColor: const Color(0xFFf8e152),
       body: SafeArea(
@@ -25,7 +25,7 @@ class PrincipalScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Bienvenido, \n${user.name}",
+                    "Bienvenido, \n${user?.name}",
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -41,13 +41,13 @@ class PrincipalScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => EditUserScreen(user: user), // Envía el usuario actual
+                          builder: (_) => EditUserScreen(user: user!), // Envía el usuario actual
                         ),
                       );
                     },
                     child: CircleAvatar(
-                      backgroundImage: user.urlUser != null && user.urlUser!.isNotEmpty
-                          ? NetworkImage(user.urlUser!) as ImageProvider
+                      backgroundImage: user?.urlUser != null && user.urlUser!.isNotEmpty
+                          ? NetworkImage(user.urlUser) as ImageProvider
                           : const AssetImage("assets/images/avatar.png"),
                       radius: 25,
                     ),
