@@ -111,6 +111,13 @@ class _ProgrammingScreenState extends State<ProgrammingScreen> {
                     );
                   },
                 ),
+        // floatingActionButton: (widget.user.role == 1 || widget.user.role == 2)
+        // ? FloatingActionButton(
+        //     backgroundColor: const Color(0xFFff8e3a),
+        //     onPressed: _createNewReport,
+        //     child: const Icon(Icons.add, color: Colors.black),
+        //   )
+        // : null,
     );
   }
 }

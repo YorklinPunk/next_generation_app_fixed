@@ -46,8 +46,8 @@ class PrincipalScreen extends ConsumerWidget {
                       );
                     },
                     child: CircleAvatar(
-                      backgroundImage: user?.urlUser != null && user.urlUser!.isNotEmpty
-                          ? NetworkImage(user.urlUser) as ImageProvider
+                      backgroundImage: user?.urlUser != null && user?.urlUser.isNotEmpty == true
+                          ? NetworkImage(user!.urlUser) as ImageProvider
                           : const AssetImage("assets/images/avatar.png"),
                       radius: 25,
                     ),
@@ -128,7 +128,7 @@ class PrincipalScreen extends ConsumerWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ReportListScreen(user: user)
+                            builder: (context) => ReportListScreen()
                           ),
                         );
                       },

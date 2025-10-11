@@ -3,16 +3,17 @@ import 'package:next_generation_app_fixed/db/mongo_database.dart';
 import 'package:next_generation_app_fixed/models/all_report_model.dart';
 import 'package:next_generation_app_fixed/models/user_model.dart';
 import 'report_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/user_provider.dart';
 
-class ReportListScreen extends StatefulWidget {
-  final UserModel user;
-  const ReportListScreen({super.key, required this.user});
-
+class ReportListScreen extends ConsumerStatefulWidget {
+  const ReportListScreen({super.key});
+  
   @override
-  State<ReportListScreen> createState() => _ReportListScreenState();
+  ConsumerState<ReportListScreen> createState() => _ReportListScreenState();
 }
 
-class _ReportListScreenState extends State<ReportListScreen> {
+class _ReportListScreenState extends ConsumerState<ReportListScreen> {
   List<AllReportModel> _reports = [];
   bool _loading = true;
   
@@ -41,11 +42,11 @@ class _ReportListScreenState extends State<ReportListScreen> {
     }
   }
 
-  void _createNewReport() async {
+  void _createNewReport(UserModel user) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ReportScreen(user: widget.user, lastReportid: id ?? null),
+        builder: (_) => ReportScreen(user: user, lastReportid: id ?? null),
       ),
     );
     _loadReports(); 
@@ -53,6 +54,7 @@ class _ReportListScreenState extends State<ReportListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
     return Scaffold(
       backgroundColor: const Color(0xFFFFD3C3),
       appBar: AppBar(
@@ -90,7 +92,7 @@ class _ReportListScreenState extends State<ReportListScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ReportScreen(user: widget.user, lastReportid: r.id),
+                                builder: (_) => ReportScreen(user: user!, lastReportid: r.id),
                               ),
                             );
                           },
@@ -124,10 +126,10 @@ class _ReportListScreenState extends State<ReportListScreen> {
           }
         },
       ),
-      floatingActionButton: (widget.user.role == 1 || widget.user.role == 2)
+      floatingActionButton: (user?.role == 1 || user?.role == 2)
           ? FloatingActionButton(
               backgroundColor: const Color(0xFFff8e3a),
-              onPressed: _createNewReport,
+              onPressed: () => _createNewReport(user!),
               child: const Icon(Icons.add, color: Colors.black),
             )
           : null,
