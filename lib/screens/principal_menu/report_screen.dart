@@ -190,14 +190,40 @@ class _ReportScreenState extends State<ReportScreen> {
 
                 
                 return GestureDetector(
-                  onDoubleTap: () => {
-                    if( widget.user.ministry == ministry.codMinistry || widget.user.role == 1 ){
-                      _startEditing(index)
-                    }else{
+                  onDoubleTap: () {
+                    final now = DateTime.now();
+                    final difference = now.difference(_latestReport.fecha).inDays;
+
+                    // Bloquear si pasaron más de 3 días
+                    if (difference > 3 && widget.user.role != 1) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("No tienes permiso para editar ${ministry.nomMinistry}")),
-                      )
+                        const SnackBar(
+                          content: Text("No puedes editar un reporte de una fecha pasada"),
+                          backgroundColor: Colors.redAccent,
+                        ),
+                      );
+                      return;
                     }
+                    // Validar permisos
+                    if (widget.user.ministry != ministry.codMinistry && widget.user.role != 1) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("No tienes permiso para editar ${ministry.nomMinistry}"),
+                          backgroundColor: Colors.orangeAccent,
+                        ),
+                      );
+                      return;
+                    }
+                    // Si todo está OK, permitir editar
+                    _startEditing(index);
+
+                    // if( widget.user.ministry == ministry.codMinistry || widget.user.role == 1 ){
+                    //   _startEditing(index)
+                    // }else{
+                    //   ScaffoldMessenger.of(context).showSnackBar(
+                    //     SnackBar(content: Text("No tienes permiso para editar ${ministry.nomMinistry}")),
+                    //   )
+                    // }
                   },
                   child: Card(
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

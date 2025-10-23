@@ -1,5 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:next_generation_app_fixed/screens/login_screen.dart';
+import '../providers/user_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:next_generation_app_fixed/db/image_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -7,15 +10,15 @@ import 'package:next_generation_app_fixed/models/user_model.dart';
 import 'package:next_generation_app_fixed/models/ministry_model.dart';
 import 'package:next_generation_app_fixed/db/mongo_database.dart';
 
-class EditUserScreen extends StatefulWidget {
+class EditUserScreen extends ConsumerStatefulWidget {
   final UserModel user;
   const EditUserScreen({super.key, required this.user});
 
   @override
-  State<EditUserScreen> createState() => _EditUserScreenState();
+  ConsumerState<EditUserScreen> createState() => _EditUserScreenState();
 }
 
-class _EditUserScreenState extends State<EditUserScreen> {
+class _EditUserScreenState extends ConsumerState<EditUserScreen> {
   late TextEditingController _nameController;
   late TextEditingController _lastNameController;
   late TextEditingController _documentController;
@@ -121,6 +124,51 @@ class _EditUserScreenState extends State<EditUserScreen> {
     Navigator.pop(context, updatedUser);
   }
 
+  void _closeSession() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Cerrar sesión"),
+        content: const Text("¿Seguro que deseas cerrar sesión?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancelar"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Sí, salir"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    // 🔹 Limpia usuario global
+    ref.read(userProvider.notifier).state = null;
+
+    // 🔹 Navega al login
+    // 🔹 Redirige al login y elimina el historial de navegación
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()), // <- aquí tu login real
+      (route) => false, // elimina todas las rutas anteriores
+    );
+  }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     body: Center(
+  //       child: ElevatedButton(
+  //         onPressed: _closeSession,
+  //         child: const Text("Cerrar Sesión"),
+  //       ),
+  //     ),
+  //   );
+  // }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -188,6 +236,22 @@ class _EditUserScreenState extends State<EditUserScreen> {
           ElevatedButton(
             onPressed: _saveChanges,
             child: const Text("Guardar cambios"),
+          ),
+          ElevatedButton(
+            onPressed: _closeSession,
+            child: const Text(
+              "Cerrar Sesión",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 231, 68, 57), // color de fondo rojo para indicar cierre / alerta
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              elevation: 5, // sombra para resaltar el botón
+            ),
           ),
         ],
       ),
